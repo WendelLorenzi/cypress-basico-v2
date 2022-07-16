@@ -2,9 +2,75 @@
 
 // describe é o switch de testes
 // a string do describe é a 
-describe('Central de atendimento ao cliente (TAT)', function() {
+describe('Central de Atendimento ao Cliente TAT', function() {
+    this.beforeEach(function() {
+        cy.visit('./src/index.html')
+    })
     // it é o teste case
     it('Verifica o titulo da aplicação', function() {
+        cy.title().should('be.equal', 'Central de Atendimento ao Cliente TAT')
+    })
+    // new test
+    it('preenche os campos obrigatórios e envia o formulário', function() {
+        cy.get('#firstName').type('Wendel')
+        cy.get('#lastName').type('Ferreira')
+        cy.get('#email').type('wendel.ferreira@startse.com')
+        cy.get('#open-text-area').type('Teste')
+        cy.get('button[type="submit"]').click()
 
+        cy.get('.success').should('be.visible')
+    })
+
+    it('exibe mensagem de erro ao submeter o formulario com um email com formatação invalida', function() {
+        cy.get('#firstName').type('Wendel')
+        cy.get('#lastName').type('Ferreira')
+        cy.get('#email').type('wendel.ferreira@startse,com')
+        cy.get('#open-text-area').type('Teste')
+        cy.get('button[type="submit"]').click()
+
+        cy.get('.error').should('be.visible')
+    })
+
+    it('campo telefone continua vazio quando preenchido com valor não-numerico', function() {
+        cy.get('#phone').type('abcdefghij').should('have.value', '')  // tenta inserir uma string em um campo numerico, caso não conseguir insere vazio
+    })
+
+    it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function() {
+        cy.get('#firstName').type('Wendel')
+        cy.get('#lastName').type('Ferreira')
+        cy.get('#email').type('wendel.ferreira@startse.com')
+        cy.get('#phone-checkbox').click()
+        cy.get('#open-text-area').type('Teste')
+        cy.get('button[type="submit"]').click()
+
+        cy.get('.error').should('be.visible')
+    })
+
+    it('preenche e limpa os campos nome, sobrenome, email e telefone', function(){
+        cy.get('#firstName').type('Wendel').should('have.value', 'Wendel').clear().should('have.value', '')  // é passado o valor 'Wendel' e verifica que o valor é o valor que foi recem digitado, após, o campo é limpo e verifica se o campo está limpo
+        cy.get('#lastName').type('Ferreira').should('have.value', 'Ferreira').clear().should('have.value', '')
+        cy.get('#email').type('wendel.ferreira@startse.com').should('have.value', 'wendel.ferreira@startse.com').clear().should('have.value', '')
+        cy.get('#phone').type('1234566').should('have.value', '1234566').clear().should('have.value', '')
+        cy.get('#open-text-area').type('teste').should('have.value', 'teste').clear().should('have.value', '')
+    })
+
+    it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', function() {
+        cy.get('button[type="submit"]').click()
+
+        cy.get('.error').should('be.visible')
+    })
+
+    it('envia o formuário com sucesso usando um comando customizado', function() {
+        cy.fillMandatoryFieldsAndSubmit('Wendel', 'Ferreira', 'wendel.ferreira@startse.com', 'texto')
+        cy.get('.success').should('be.visible')
+    })
+
+    it('acha botão pelo nome e testa', function() {
+        cy.get('#firstName').type('Wendel')
+        cy.get('#lastName').type('Ferreira')
+        cy.get('#email').type('wendel.ferreira@startse.com')
+        cy.get('#phone-checkbox').click()
+        cy.get('#open-text-area').type('Teste')
+        cy.contains('button', 'Enviar').click()  //busca o botão pelo texto e faz um click
     })
 })
